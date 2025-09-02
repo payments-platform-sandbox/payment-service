@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: OPA Adapter API
+  version: 0.1.0
+servers:
+- url: http://localhost:8081
+paths:
+  /v1/decision/payments/allow:
+    post:
+      operationId: evaluatePaymentPolicy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyInput'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyDecision'
+          description: Decision
+      summary: Evaluate payment policy
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    PolicyInput:
+      example:
+        amountCents: 1
+        paymentId: paymentId
+        context:
+          key: context
+        action: create
+        currency: USD
+        userId: userId
+      properties:
+        userId:
+          type: string
+        paymentId:
+          type: string
+        action:
+          enum:
+          - create
+          - refund
+          - cancel
+          type: string
+        amountCents:
+          format: int64
+          minimum: 1
+          type: integer
+        currency:
+          example: USD
+          type: string
+        context:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - action
+      - amountCents
+      type: object
+    PolicyDecision:
+      example:
+        reason: reason
+        decision: allow
+        constraints:
+          key: constraints
+      properties:
+        decision:
+          enum:
+          - allow
+          - deny
+          type: string
+        reason:
+          type: string
+        constraints:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - decision
+      type: object
+
